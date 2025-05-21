@@ -1,102 +1,111 @@
-🐊 Florida Man Headlines — Daily Gator
-A Progressive Web App that aggregates and displays the wildest "Florida Man" news stories from around the web.
+Absolutely! Here's your `README.md` reformatted to match the clean, minimal, and elegant style used in [your `ambient` repo](https://github.com/notadonis/ambient):
 
-🌴 Overview
-Daily Gator automatically scrapes and showcases the most outrageous "Florida Man" headlines from online sources, updating hourly. Designed as a mobile-first PWA, the app offers a smooth, offline-ready experience with bookmarking and native install capabilities.
+---
 
-🔥 Features
-📡 Live News Feed – Hourly-updated stories featuring the infamous Florida Man
+````md
+# 🐊 Daily Gator
 
-📴 Offline Access – Full PWA support lets you browse stories without an internet connection
+A lightweight, offline-first PWA that aggregates the wildest "Florida Man" headlines from around the web.
 
-🔖 Bookmarking – Save your favorite Florida Man escapades
+---
 
-📱 Mobile-First – Install on your home screen like a native app
+## 🌴 Overview
 
-🧪 Coming Soon
-🎂 Florida Man Birthday Challenge – Discover what Florida Man did on your birthday
+**Daily Gator** scrapes outrageous "Florida Man" news stories from selected sites and presents them in a clean, mobile-friendly interface. Built with zero frameworks and hosted entirely on GitHub Pages.
 
-🗺️ Heat Map – Visualize where the wildest stories originate in Florida
+---
 
-🧐 Florida or Not? – Quiz game to test your weird-news instincts
+## ✨ Features
 
-🏆 Florida Man of the Month – Community voting for the craziest headline
+- 📡 Live hourly updates from curated Florida news sources  
+- 📴 Full offline access via service worker  
+- 🔖 Bookmark stories with LocalStorage  
+- 📱 PWA support for installable mobile experience
 
-☀️ Weather Correlation – Analyze how heat and humidity affect Florida Man behavior
+---
 
-🚀 Installation
-📱 As a PWA (Mobile)
-Open the app in your mobile browser
+## 🧪 Coming Soon
 
-Tap Add to Home Screen in your browser menu
+- 🎂 Florida Man Birthday Challenge  
+- 🗺️ Wildness Heat Map  
+- 🤔 Florida or Not? quiz game  
+- 🏆 Florida Man of the Month vote  
+- 🌦️ Weather correlation feature
 
-Launch Daily Gator like a native app
+---
 
-💻 As a PWA (Desktop)
-Open the app in Chrome, Edge, or any PWA-compatible browser
+## ⚙️ Installation
 
-Click the install icon in the address bar
+### Mobile (PWA)
 
-Follow the prompt to install
+1. Open the app in your browser  
+2. Tap “Add to Home Screen”  
+3. Launch like a native app  
 
-🛠️ From Source
-bash
-Copy
-Edit
+### Desktop (PWA)
+
+1. Open in Chrome/Edge  
+2. Click the install icon in the address bar  
+3. Follow the prompt  
+
+### From Source
+
+```bash
 git clone https://github.com/your-username/daily-gator.git
 cd daily-gator
-# Open index.html in your browser, or:
 python3 -m http.server
-🔧 Technical Details
-📦 No frameworks – Just vanilla HTML, CSS, and JavaScript
+````
 
-🤖 GitHub Actions – Scheduled scraping every hour
+---
 
-💾 LocalStorage – Client-side storage for bookmarks
+## 🧠 How It Works
 
-📡 Service Worker – Enables full offline support
+* A GitHub Action scrapes stories every hour
+* Headlines with "Florida Man" are saved to a JSON file
+* Frontend fetches and renders the latest list
+* Service worker enables offline reading
 
-🚀 Deployed via GitHub Pages – 100% free hosting
+---
 
-📊 How It Works
-A GitHub Action runs every hour and scrapes select Florida news sources
+## 🛠️ Stack
 
-Headlines containing “Florida Man” are filtered and saved to a JSON file
+* HTML / CSS / JavaScript (vanilla)
+* GitHub Actions (data pipeline)
+* GitHub Pages (hosting)
+* Service Workers + LocalStorage
 
-The frontend fetches and renders these stories
+---
 
-Service workers ensure the app is usable offline
+## 🤝 Contributing
 
-🤝 Contributing
-We welcome contributions!
+Pull requests welcome.
 
-bash
-Copy
-Edit
-# Fork the repository
-# Create your feature branch
+```bash
+# Fork the repo
+# Create a feature branch
 git checkout -b feature/amazing-feature
 
-# Make changes and commit
+# Commit and push
 git commit -m "Add amazing feature"
-
-# Push and open a PR
 git push origin feature/amazing-feature
-🧠 Development Ideas
-Improve scraper accuracy and filtering logic
+```
 
-Expand news source coverage
+---
 
-Build "Coming Soon" features
+## 📄 License
 
-Refine the UI/UX and responsiveness
+[MIT](LICENSE)
 
-📄 License
-This project is licensed under the MIT License.
+---
 
-🙏 Acknowledgments
-Inspired by the internet’s obsession with all things Florida Man
+## 🙏 Acknowledgments
 
-Built with 💚 for the weird and wonderful residents of the Sunshine State
+Built with love for Florida and its weirdly wonderful residents.
+No gators were harmed in the making of this app.
 
-Disclaimer: Daily Gator is for entertainment purposes only. We love Florida—and no gators were harmed in the making of this app.
+```
+
+---
+
+Let me know if you'd like this written directly to a file, or adapted into a live site version!
+```
