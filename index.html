@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Florida Man News Feed</title>
+    <title>Daily Gator - Florida Man News Feed</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="manifest" href="/dailygator/manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <link rel="apple-touch-icon" href="/dailygator/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <style>
         .new-story {
             animation: highlight 3s ease-out;
@@ -18,8 +23,8 @@
 <body class="bg-blue-50">
     <div class="container mx-auto px-4 py-8">
         <header class="mb-8 text-center">
-            <h1 class="text-4xl font-bold text-red-600">Florida Man News Feed</h1>
-            <p class="text-gray-600">The wildest news from the Sunshine State</p>
+            <h1 class="text-4xl font-bold text-red-600">Daily Gator</h1>
+            <p class="text-gray-600">Where Headlines Bite Harder Than the Wildlife</p>
             <div class="mt-4">
                 <button id="refresh-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
                     <span id="notification-badge" class="hidden inline-block bg-yellow-400 text-xs text-black font-bold rounded-full px-2 py-1 mr-1">New!</span>
@@ -28,12 +33,12 @@
             </div>
         </header>
         
-        <nav class="mb-6 flex flex-wrap justify-center gap-4">
-            <button class="feature-btn bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md">Birthday Challenge</button>
-            <button class="feature-btn bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-md">Heat Map</button>
-            <button class="feature-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md">Florida or Not?</button>
-            <button class="feature-btn bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md">Man of the Month</button>
-            <button class="feature-btn bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md">Weather Alerts</button>
+        <nav class="mb-6 bg-white shadow-md rounded-md overflow-hidden">
+            <div class="flex">
+                <button id="news-tab" class="flex-1 py-3 px-4 bg-red-500 text-white font-medium">News Feed</button>
+                <button id="saved-tab" class="flex-1 py-3 px-4 bg-white text-gray-700 font-medium">Saved Stories</button>
+                <button id="features-tab" class="flex-1 py-3 px-4 bg-white text-gray-700 font-medium">Features</button>
+            </div>
         </nav>
         
         <div id="coming-soon-message" class="hidden mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md">
@@ -42,14 +47,25 @@
         
         <main>
             <div id="stories-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Stories will be added here dynamically -->
+                <!-- Loading placeholders -->
                 <div class="animate-pulse bg-white p-4 rounded-lg shadow">
                     <div class="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
                     <div class="h-4 bg-gray-200 rounded mb-2"></div>
                     <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
                     <div class="h-4 bg-gray-200 rounded w-4/6"></div>
                 </div>
-                <!-- More loading placeholders -->
+                <div class="animate-pulse bg-white p-4 rounded-lg shadow">
+                    <div class="h-6 bg-gray-200 rounded w-2/3 mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div class="animate-pulse bg-white p-4 rounded-lg shadow">
+                    <div class="h-6 bg-gray-200 rounded w-4/5 mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
             </div>
         </main>
     </div>
@@ -57,6 +73,7 @@
     <script>
         let lastFetchTime = 0;
         let knownStoryIds = new Set();
+        let savedStories = JSON.parse(localStorage.getItem('savedStories') || '[]');
         
         // Show "coming soon" message for feature buttons
         document.querySelectorAll('.feature-btn').forEach(btn => {
@@ -69,36 +86,83 @@
             });
         });
         
+        // Check online status and update UI accordingly
+        function updateOnlineStatus() {
+            const statusDisplay = document.createElement('div');
+            if (navigator.onLine) {
+                statusDisplay.className = 'hidden';
+            } else {
+                statusDisplay.className = 'bg-yellow-100 text-yellow-800 p-3 fixed bottom-0 w-full text-center';
+                statusDisplay.textContent = 'You are currently offline. Showing cached content.';
+            }
+            
+            // Remove any existing status displays
+            const existingStatus = document.querySelector('.fixed.bottom-0');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+            
+            document.body.appendChild(statusDisplay);
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus(); // Initial check
+        
         // Main function to fetch and display stories
         async function fetchStories() {
             try {
-                const response = await fetch('florida_man_stories.json?t=' + new Date().getTime());
+                // Updated path for GitHub Pages
+                const response = await fetch('/dailygator/florida_man_stories.json?t=' + new Date().getTime());
                 const data = await response.json();
+                
+                // Debug output - remove in production
+                console.log("Fetched data:", data);
                 
                 // Check for new stories
                 let newStoriesCount = 0;
-                data.stories.forEach(story => {
-                    const storyId = story.link; // Use link as unique ID
-                    if (!knownStoryIds.has(storyId)) {
-                        newStoriesCount++;
-                        knownStoryIds.add(storyId);
+                if (data.stories && Array.isArray(data.stories)) {
+                    data.stories.forEach(story => {
+                        const storyId = story.link; // Use link as unique ID
+                        if (!knownStoryIds.has(storyId)) {
+                            newStoriesCount++;
+                            knownStoryIds.add(storyId);
+                        }
+                    });
+                    
+                    // Show notification badge if there are new stories
+                    if (newStoriesCount > 0 && lastFetchTime > 0) {
+                        const badge = document.getElementById('notification-badge');
+                        badge.textContent = newStoriesCount > 1 ? `${newStoriesCount} New!` : 'New!';
+                        badge.classList.remove('hidden');
                     }
-                });
-                
-                // Show notification badge if there are new stories
-                if (newStoriesCount > 0 && lastFetchTime > 0) {
-                    const badge = document.getElementById('notification-badge');
-                    badge.textContent = newStoriesCount > 1 ? `${newStoriesCount} New!` : 'New!';
-                    badge.classList.remove('hidden');
+                    
+                    // Update timestamp
+                    lastFetchTime = Date.now();
+                    
+                    // Display stories
+                    displayStories(data.stories);
+                } else {
+                    // Handle case where stories array is missing or not an array
+                    console.error("Invalid data format:", data);
+                    displayStories([]);
                 }
-                
-                // Update timestamp
-                lastFetchTime = Date.now();
-                
-                // Display stories
-                displayStories(data.stories);
             } catch (error) {
                 console.error('Error fetching stories:', error);
+                displayStories([]);
+            }
+        }
+        
+        function saveStory(storyId, storyData) {
+            if (!savedStories.some(story => story.id === storyId)) {
+                savedStories.push({
+                    id: storyId,
+                    ...storyData
+                });
+                localStorage.setItem('savedStories', JSON.stringify(savedStories));
+                alert('Story saved! Find it in your saved stories.');
+            } else {
+                alert('This story is already saved!');
             }
         }
         
@@ -106,7 +170,25 @@
             const container = document.getElementById('stories-container');
             container.innerHTML = ''; // Clear loading placeholders
             
+            // Debug output
+            console.log("Stories to display:", stories);
+            
+            if (!stories || stories.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full p-8 text-center">
+                        <h2 class="text-xl font-bold mb-4">No Florida Man stories found yet!</h2>
+                        <p>The scraper might still be collecting stories, or Florida Man is taking a day off.</p>
+                        <p class="mt-4">Check back soon or <button id="manual-refresh" class="text-blue-500 underline">try a manual refresh</button>.</p>
+                    </div>
+                `;
+                document.getElementById('manual-refresh').addEventListener('click', fetchStories);
+                return;
+            }
+            
             stories.forEach(story => {
+                const storyId = story.link; // Use link as unique ID
+                const isAlreadySaved = savedStories.some(saved => saved.id === storyId);
+                
                 const card = document.createElement('div');
                 card.className = 'bg-white p-4 rounded-lg shadow hover:shadow-md transition';
                 
@@ -119,7 +201,15 @@
                     <p class="text-gray-700 mb-4">${story.preview || 'Click to read this wild Florida Man story...'}</p>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-500 text-sm">${formatDate(story.date)}</span>
-                        <a href="${story.link}" target="_blank" class="text-blue-500 hover:text-blue-700">Read More →</a>
+                        <div class="flex items-center">
+                            <button class="mr-3 ${isAlreadySaved ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}" 
+                                    onclick='saveStory("${storyId}", ${JSON.stringify(story).replace(/"/g, '&quot;')})'>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                                </svg>
+                            </button>
+                            <a href="${story.link}" target="_blank" class="text-blue-500 hover:text-blue-700">Read More →</a>
+                        </div>
                     </div>
                 `;
                 
@@ -128,15 +218,176 @@
         }
         
         function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            if (!dateString) return 'Recently';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            } catch (e) {
+                return 'Recently';
+            }
         }
+        
+        function showSavedStories() {
+            const container = document.getElementById('stories-container');
+            container.innerHTML = '<h2 class="col-span-full text-2xl font-bold mb-4">Your Saved Florida Man Adventures</h2>';
+            
+            if (savedStories.length === 0) {
+                container.innerHTML += '<p class="col-span-full text-gray-500">No stories saved yet. Click the bookmark icon on stories to save them!</p>';
+                return;
+            }
+            
+            savedStories.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow hover:shadow-md transition';
+                
+                card.innerHTML = `
+                    <span class="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mb-2">${story.location || 'Florida'}</span>
+                    <h2 class="text-xl font-bold mb-2">${story.title}</h2>
+                    <p class="text-gray-700 mb-4">${story.preview || 'Click to read this wild Florida Man story...'}</p>
+                    <div class="flex justify-between items-center">
+                        <button class="text-red-500 hover:text-red-700" onclick="removeFromSaved('${story.id}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <a href="${story.link}" target="_blank" class="text-blue-500 hover:text-blue-700">Read More →</a>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function removeFromSaved(storyId) {
+            savedStories = savedStories.filter(story => story.id !== storyId);
+            localStorage.setItem('savedStories', JSON.stringify(savedStories));
+            showSavedStories(); // Refresh the display
+        }
+        
+        function showFeatures() {
+            const container = document.getElementById('stories-container');
+            container.innerHTML = `
+                <div class="col-span-full">
+                    <h2 class="text-2xl font-bold mb-4">Florida Man Features</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-bold mb-2">Florida Man Birthday Challenge</h3>
+                            <p class="text-gray-700 mb-4">Find out what Florida Man did on your birthday!</p>
+                            <p class="text-gray-500 italic">Coming soon</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-bold mb-2">Florida Heat Map</h3>
+                            <p class="text-gray-700 mb-4">See where the wildest Florida Man stories happen.</p>
+                            <p class="text-gray-500 italic">Coming soon</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-bold mb-2">Florida or Not?</h3>
+                            <p class="text-gray-700 mb-4">Test your Florida Man knowledge with this quiz game.</p>
+                            <p class="text-gray-500 italic">Coming soon</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-bold mb-2">Florida Man of the Month</h3>
+                            <p class="text-gray-700 mb-4">Vote for the most outrageous Florida Man story.</p>
+                            <p class="text-gray-500 italic">Coming soon</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Tab navigation
+        document.getElementById('news-tab').addEventListener('click', () => {
+            document.getElementById('news-tab').classList.replace('bg-white', 'bg-red-500');
+            document.getElementById('news-tab').classList.replace('text-gray-700', 'text-white');
+            document.getElementById('saved-tab').classList.replace('bg-red-500', 'bg-white');
+            document.getElementById('saved-tab').classList.replace('text-white', 'text-gray-700');
+            document.getElementById('features-tab').classList.replace('bg-red-500', 'bg-white');
+            document.getElementById('features-tab').classList.replace('text-white', 'text-gray-700');
+            
+            fetchStories(); // Show main news feed
+        });
+        
+        document.getElementById('saved-tab').addEventListener('click', () => {
+            document.getElementById('saved-tab').classList.replace('bg-white', 'bg-red-500');
+            document.getElementById('saved-tab').classList.replace('text-gray-700', 'text-white');
+            document.getElementById('news-tab').classList.replace('bg-red-500', 'bg-white');
+            document.getElementById('news-tab').classList.replace('text-white', 'text-gray-700');
+            document.getElementById('features-tab').classList.replace('bg-red-500', 'bg-white');
+            document.getElementById('features-tab').classList.replace('text-white', 'text-gray-700');
+            
+            showSavedStories(); // Show saved stories
+        });
+        
+        document.getElementById('features-tab').addEventListener('click', () => {
+            document.getElementById('features-tab').classList.replace('bg-white', 'bg-red-500');
+            document.getElementById('features-tab').classList.replace('text-gray-700', 'text-white');
+            document.getElementById('news-tab').classList.replace('bg-red-500', 'bg-white');
+            document.getElementById('news-tab').classList.replace('text-white', 'text-gray-700');
+            document.getElementById('saved-tab').classList.replace('bg-red-500', 'bg-white');
+            document.getElementById('saved-tab').classList.replace('text-white', 'text-gray-700');
+            
+            showFeatures(); // Show features menu
+        });
         
         // Refresh button functionality
         document.getElementById('refresh-btn').addEventListener('click', () => {
             fetchStories();
             document.getElementById('notification-badge').classList.add('hidden');
         });
+        
+        // PWA installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            
+            // Show the install button
+            const installBanner = document.createElement('div');
+            installBanner.className = 'fixed bottom-0 left-0 right-0 bg-blue-100 p-4 flex justify-between items-center';
+            installBanner.innerHTML = `
+                <div>
+                    <p class="font-bold">Install Daily Gator App</p>
+                    <p class="text-sm text-gray-700">Get the latest Florida Man stories offline!</p>
+                </div>
+                <div class="flex">
+                    <button id="install-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mr-2">Install</button>
+                    <button id="close-banner" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md">Not Now</button>
+                </div>
+            `;
+            
+            document.body.appendChild(installBanner);
+            
+            document.getElementById('install-btn').addEventListener('click', async () => {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                // We've used the prompt, and can't use it again, so drop the reference
+                deferredPrompt = null;
+                // Hide the install banner
+                installBanner.remove();
+            });
+            
+            document.getElementById('close-banner').addEventListener('click', () => {
+                installBanner.remove();
+            });
+        });
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/dailygator/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
         
         // Initial fetch
         fetchStories();
