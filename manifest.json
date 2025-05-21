@@ -4,8 +4,8 @@
   "description": "Florida Man News Aggregator",
   "start_url": "/dailygator/",
   "display": "standalone",
-  "background_color": "#f0fdfa",
-  "theme_color": "#10b981",
+  "background_color": "#FAF9F5",
+  "theme_color": "#FAF9F5",
   "icons": [
     {
       "src": "icons/icon-192x192.png",
