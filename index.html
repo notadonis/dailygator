@@ -373,14 +373,6 @@
             const container = document.getElementById('stories-container');
             container.innerHTML = '';
             
-            const header = document.createElement('div');
-            header.className = 'col-span-full mb-6';
-            header.innerHTML = `
-                <h2 class="text-2xl font-bold mb-2 text-gray-100">Your Saved Florida Man Adventures</h2>
-                <p class="text-gray-400">The wildest stories you've saved for later</p>
-            `;
-            container.appendChild(header);
-            
             if (savedStories.length === 0) {
                 const emptyState = document.createElement('div');
                 emptyState.className = 'col-span-full p-8 text-center bg-gray-800 rounded-xl border border-gray-700';
@@ -445,58 +437,53 @@
         }
         
         function showFeatures() {
-            const container = document.getElementById('stories-container');
-            container.innerHTML = `
-                <div class="col-span-full mb-6">
-                    <h2 class="text-2xl font-bold mb-2 text-gray-100">Florida Man Features</h2>
-                    <p class="text-gray-400">Coming soon to enhance your Florida Man experience</p>
-                </div>
-                
-                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
-                    <div class="flex items-center mb-3">
-                        <span class="text-pink-500 text-2xl mr-3"><i class="fas fa-calendar-day"></i></span>
-                        <h3 class="text-xl font-bold text-gray-100">Florida Man Birthday Challenge</h3>
-                    </div>
-                    <p class="text-gray-400 mb-3">Find out what Florida Man did on your birthday!</p>
-                    <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
-                        <p class="text-gray-500">Coming soon</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
-                    <div class="flex items-center mb-3">
-                        <span class="text-blue-500 text-2xl mr-3"><i class="fas fa-map-marked-alt"></i></span>
-                        <h3 class="text-xl font-bold text-gray-100">Florida Heat Map</h3>
-                    </div>
-                    <p class="text-gray-400 mb-3">See where the wildest Florida Man stories happen.</p>
-                    <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
-                        <p class="text-gray-500">Coming soon</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
-                    <div class="flex items-center mb-3">
-                        <span class="text-yellow-500 text-2xl mr-3"><i class="fas fa-question-circle"></i></span>
-                        <h3 class="text-xl font-bold text-gray-100">Florida or Not?</h3>
-                    </div>
-                    <p class="text-gray-400 mb-3">Test your Florida Man knowledge with this quiz game.</p>
-                    <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
-                        <p class="text-gray-500">Coming soon</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
-                    <div class="flex items-center mb-3">
-                        <span class="text-purple-500 text-2xl mr-3"><i class="fas fa-trophy"></i></span>
-                        <h3 class="text-xl font-bold text-gray-100">Florida Man of the Month</h3>
-                    </div>
-                    <p class="text-gray-400 mb-3">Vote for the most outrageous Florida Man story.</p>
-                    <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
-                        <p class="text-gray-500">Coming soon</p>
-                    </div>
-                </div>
-            `;
-        }
+    const container = document.getElementById('stories-container');
+    container.innerHTML = `
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
+            <div class="flex items-center mb-3">
+                <span class="text-pink-500 text-2xl mr-3"><i class="fas fa-calendar-day"></i></span>
+                <h3 class="text-xl font-bold text-gray-100">Florida Man Birthday Challenge</h3>
+            </div>
+            <p class="text-gray-400 mb-3">Find out what Florida Man did on your birthday!</p>
+            <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
+                <p class="text-gray-500">Coming soon</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
+            <div class="flex items-center mb-3">
+                <span class="text-blue-500 text-2xl mr-3"><i class="fas fa-map-marked-alt"></i></span>
+                <h3 class="text-xl font-bold text-gray-100">Florida Heat Map</h3>
+            </div>
+            <p class="text-gray-400 mb-3">See where the wildest Florida Man stories happen.</p>
+            <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
+                <p class="text-gray-500">Coming soon</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
+            <div class="flex items-center mb-3">
+                <span class="text-yellow-500 text-2xl mr-3"><i class="fas fa-question-circle"></i></span>
+                <h3 class="text-xl font-bold text-gray-100">Florida or Not?</h3>
+            </div>
+            <p class="text-gray-400 mb-3">Test your Florida Man knowledge with this quiz game.</p>
+            <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
+                <p class="text-gray-500">Coming soon</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shine">
+            <div class="flex items-center mb-3">
+                <span class="text-purple-500 text-2xl mr-3"><i class="fas fa-trophy"></i></span>
+                <h3 class="text-xl font-bold text-gray-100">Florida Man of the Month</h3>
+            </div>
+            <p class="text-gray-400 mb-3">Vote for the most outrageous Florida Man story.</p>
+            <div class="bg-gray-900 rounded-lg p-4 mt-4 text-center">
+                <p class="text-gray-500">Coming soon</p>
+            </div>
+        </div>
+    `;
+}
         
         // Tab navigation
         document.getElementById('news-tab').addEventListener('click', () => {
