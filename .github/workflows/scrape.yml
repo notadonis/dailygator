@@ -1,0 +1,33 @@
+name: Scrape Florida Man News
+
+on:
+  schedule:
+    - cron: '0 */1 * * *'  # Run every hour
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+          
+      - name: Run scraper
+        run: python scraper.py
+        
+      - name: Commit and push if changed
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add florida_man_stories.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update Florida Man stories"
+          git push
