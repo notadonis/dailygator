@@ -1,21 +1,16 @@
-Absolutely! Here's your `README.md` reformatted to match the clean, minimal, and elegant style used in [your `ambient` repo](https://github.com/notadonis/ambient):
-
----
-
-````md
-# 🐊 Daily Gator
+🐊 Daily Gator
 
 A lightweight, offline-first PWA that aggregates the wildest "Florida Man" headlines from around the web.
 
 ---
 
-## 🌴 Overview
+🌴 Overview
 
 **Daily Gator** scrapes outrageous "Florida Man" news stories from selected sites and presents them in a clean, mobile-friendly interface. Built with zero frameworks and hosted entirely on GitHub Pages.
 
 ---
 
-## ✨ Features
+✨ Features
 
 - 📡 Live hourly updates from curated Florida news sources  
 - 📴 Full offline access via service worker  
@@ -103,9 +98,4 @@ git push origin feature/amazing-feature
 Built with love for Florida and its weirdly wonderful residents.
 No gators were harmed in the making of this app.
 
-```
-
----
-
-Let me know if you'd like this written directly to a file, or adapted into a live site version!
 ```
