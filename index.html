@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Florida Man News Feed</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .new-story {
+            animation: highlight 3s ease-out;
+        }
+        @keyframes highlight {
+            0% { background-color: #fef3c7; }
+            100% { background-color: transparent; }
+        }
+    </style>
+</head>
+<body class="bg-blue-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-red-600">Florida Man News Feed</h1>
+            <p class="text-gray-600">The wildest news from the Sunshine State</p>
+            <div class="mt-4">
+                <button id="refresh-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
+                    <span id="notification-badge" class="hidden inline-block bg-yellow-400 text-xs text-black font-bold rounded-full px-2 py-1 mr-1">New!</span>
+                    Refresh Feed
+                </button>
+            </div>
+        </header>
+        
+        <nav class="mb-6 flex flex-wrap justify-center gap-4">
+            <button class="feature-btn bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md">Birthday Challenge</button>
+            <button class="feature-btn bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-md">Heat Map</button>
+            <button class="feature-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md">Florida or Not?</button>
+            <button class="feature-btn bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md">Man of the Month</button>
+            <button class="feature-btn bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md">Weather Alerts</button>
+        </nav>
+        
+        <div id="coming-soon-message" class="hidden mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-md">
+            Feature coming soon! Currently developing the main news feed.
+        </div>
+        
+        <main>
+            <div id="stories-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Stories will be added here dynamically -->
+                <div class="animate-pulse bg-white p-4 rounded-lg shadow">
+                    <div class="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-4/6"></div>
+                </div>
+                <!-- More loading placeholders -->
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        let lastFetchTime = 0;
+        let knownStoryIds = new Set();
+        
+        // Show "coming soon" message for feature buttons
+        document.querySelectorAll('.feature-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const message = document.getElementById('coming-soon-message');
+                message.classList.remove('hidden');
+                setTimeout(() => {
+                    message.classList.add('hidden');
+                }, 3000);
+            });
+        });
+        
+        // Main function to fetch and display stories
+        async function fetchStories() {
+            try {
+                const response = await fetch('florida_man_stories.json?t=' + new Date().getTime());
+                const data = await response.json();
+                
+                // Check for new stories
+                let newStoriesCount = 0;
+                data.stories.forEach(story => {
+                    const storyId = story.link; // Use link as unique ID
+                    if (!knownStoryIds.has(storyId)) {
+                        newStoriesCount++;
+                        knownStoryIds.add(storyId);
+                    }
+                });
+                
+                // Show notification badge if there are new stories
+                if (newStoriesCount > 0 && lastFetchTime > 0) {
+                    const badge = document.getElementById('notification-badge');
+                    badge.textContent = newStoriesCount > 1 ? `${newStoriesCount} New!` : 'New!';
+                    badge.classList.remove('hidden');
+                }
+                
+                // Update timestamp
+                lastFetchTime = Date.now();
+                
+                // Display stories
+                displayStories(data.stories);
+            } catch (error) {
+                console.error('Error fetching stories:', error);
+            }
+        }
+        
+        function displayStories(stories) {
+            const container = document.getElementById('stories-container');
+            container.innerHTML = ''; // Clear loading placeholders
+            
+            stories.forEach(story => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow hover:shadow-md transition';
+                
+                // Extract Florida city or default to "Florida"
+                const location = story.location || 'Florida';
+                
+                card.innerHTML = `
+                    <span class="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded mb-2">${location}</span>
+                    <h2 class="text-xl font-bold mb-2">${story.title}</h2>
+                    <p class="text-gray-700 mb-4">${story.preview || 'Click to read this wild Florida Man story...'}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">${formatDate(story.date)}</span>
+                        <a href="${story.link}" target="_blank" class="text-blue-500 hover:text-blue-700">Read More →</a>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        
+        // Refresh button functionality
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            fetchStories();
+            document.getElementById('notification-badge').classList.add('hidden');
+        });
+        
+        // Initial fetch
+        fetchStories();
+        
+        // Set up periodic checks for new content (every 5 minutes)
+        setInterval(fetchStories, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
