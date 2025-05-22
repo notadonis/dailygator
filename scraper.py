@@ -1,154 +1,129 @@
-sources = [
-    "https://www.foxnews.com/category/us/us-regions/southeast/florida",
-    "https://www.local10.com/news/florida/",
-    "https://www.tampabay.com/news/florida/",
-    "https://www.miaminewtimes.com/news",
-    "https://www.orlandoweekly.com/news",
-    "https://thefloridastar.com/category/news/"
-    # Add more Florida news sources
+import feedparser
+import json
+import time # Added
+from datetime import datetime
+
+# Removed old 'requests' and 'BeautifulSoup' imports as they are no longer needed for core functionality
+# import requests
+# from bs4 import BeautifulSoup
+# import os # Not strictly necessary anymore unless other file operations are added
+
+# RSS Feed URLs
+FOX_NEWS_RSS = "https://moxie.foxnews.com/google-publisher/us.xml"
+LOCAL10_RSS = "https://www.local10.com/arc/outboundfeeds/rss/category/news/?outputType=xml&size=20"
+MIAMI_NEW_TIMES_RSS = "https://www.miaminewtimes.com/miami/Rss.xml?oid=6202154"
+ORLANDO_WEEKLY_RSS = "https://www.orlandoweekly.com/orlando/Rss.xml?oid=2240408"
+FLORIDA_STAR_RSS = "https://www.thefloridastar.com/category/news/feed/"
+
+rss_sources = [
+    {"name": "Fox News", "url": FOX_NEWS_RSS, "original_url": "https://www.foxnews.com/category/us/us-regions/southeast/florida"},
+    {"name": "Local10", "url": LOCAL10_RSS, "original_url": "https://www.local10.com/news/florida/"},
+    {"name": "Miami New Times", "url": MIAMI_NEW_TIMES_RSS, "original_url": "https://www.miaminewtimes.com/news"},
+    {"name": "Orlando Weekly", "url": ORLANDO_WEEKLY_RSS, "original_url": "https://www.orlandoweekly.com/news"},
+    {"name": "The Florida Star", "url": FLORIDA_STAR_RSS, "original_url": "https://thefloridastar.com/category/news/"}
+    # Tampa Bay Times is excluded as no RSS feed was found.
 ]
 
+# Old sources list commented out
+# sources = [
+#     "https://www.foxnews.com/category/us/us-regions/southeast/florida",
+#     "https://www.local10.com/news/florida/",
+#     "https://www.tampabay.com/news/florida/",
+#     "https://www.miaminewtimes.com/news",
+#     "https://www.orlandoweekly.com/news",
+#     "https://thefloridastar.com/category/news/"
+#     # Add more Florida news sources
+# ]
+
+
+def is_florida_man_story(title, text):
+    keywords = [
+        "florida man", "florida woman", "florida resident", "florida person", 
+        "a florida", "gainesville", "jacksonville", "miami", "orlando", "tampa", 
+        "arrested in florida", "florida sheriff", "bizarre florida", "strange florida"
+    ]
+    title_lower = title.lower()
+    text_lower = text.lower()
+    return any(keyword in title_lower or keyword in text_lower for keyword in keywords)
+
+
 def scrape_stories():
-    for source in sources:
+    stories = []
+    max_stories_per_feed = 50 # As per previous logic for HTML scraping iteration limit
+    target_total_stories = 10
+
+    for source_info in rss_sources:
+        if len(stories) >= target_total_stories:
+            print(f"Reached target of {target_total_stories} stories. Stopping.")
+            break
+
+        print(f"Fetching stories from {source_info['name']} ({source_info['url']})...")
         try:
-            response = requests.get(source, headers={'User-Agent': 'Mozilla/5.0'})
-            response.raise_for_status()  # Raise an exception for HTTP errors
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            articles = []
-            site_selectors = {}
+            feed = feedparser.parse(source_info['url'])
 
-            if "miaminewtimes.com/news" in source:
-                site_selectors = {
-                    'article': 'div.section-story-package-story', # Placeholder
-                    'title': 'div.story-headline > a',       # Placeholder
-                    'link_is_article': False,                 # Link is usually within title_elem for this structure
-                    'preview': 'div.story-dek'                # Placeholder
-                }
-                articles = soup.select(site_selectors['article'])
-            elif "orlandoweekly.com/news" in source:
-                site_selectors = {
-                    'article': 'div.article-list-item',    # Placeholder
-                    'title': 'a.story-title',              # Placeholder
-                    'link_is_article': False,                # Link is usually within title_elem
-                    'preview': 'div.story-lead'            # Placeholder
-                }
-                articles = soup.select(site_selectors['article'])
-            elif "thefloridastar.com/category/news/" in source:
-                site_selectors = {
-                    'article': 'article.post',             # Placeholder
-                    'title': 'h2.entry-title > a',       # Placeholder
-                    'link_is_article': False,                # Link is usually within title_elem
-                    'preview': 'div.entry-summary'         # Placeholder
-                }
-                articles = soup.select(site_selectors['article'])
-            else:
-                # Fallback to generic selectors
-                articles = soup.select('article') or soup.select('.story') or soup.select('.news-item')
-                site_selectors = { # Define for consistent access pattern later
-                    'article': None, # Not used for selection here, but for structure
-                    'title': 'h2, .title', # Combined for select_one
-                    'link_is_article': False, # Default assumption
-                    'preview': 'p, .summary' # Combined for select_one
-                }
+            if feed.bozo:
+                print(f"Warning: Feed for {source_info['name']} may be malformed. Bozo bit set with exception: {feed.bozo_exception}")
 
+            if not feed.entries:
+                print(f"No entries found for {source_info['name']}.")
+                continue
 
-            for article_idx, article in enumerate(articles[:50]):
-                title_elem = None
-                link_elem = None # For specific link elements if not the article or title_elem
-                preview_elem = None
-                title = ""
-                link = ""
+            entries_logged_count = 0 # Initialize for each new feed
+
+            for entry_idx, entry in enumerate(feed.entries):
+                if entry_idx >= max_stories_per_feed:
+                    print(f"Processed {max_stories_per_feed} entries for {source_info['name']}, moving to next source.")
+                    break
+                
+                if len(stories) >= target_total_stories:
+                    break # Break from entries loop if target met
+
+                title = entry.title if hasattr(entry, 'title') else ""
+                link = entry.link if hasattr(entry, 'link') else ""
+                
                 preview = ""
+                if hasattr(entry, 'summary'):
+                    preview = entry.summary
+                elif hasattr(entry, 'description'):
+                    preview = entry.description
 
-                try:
-                    if "miaminewtimes.com/news" in source or \
-                       "orlandoweekly.com/news" in source or \
-                       "thefloridastar.com/category/news/" in source:
-                        
-                        title_elem = article.select_one(site_selectors['title'])
-                        if title_elem:
-                            title = title_elem.text.strip()
-                            # Link is typically href of the title element for these structures
-                            if title_elem.has_attr('href'):
-                                link = title_elem['href']
-                            else: # Check if parent is a link
-                                parent_link = title_elem.find_parent('a')
-                                if parent_link and parent_link.has_attr('href'):
-                                    link = parent_link['href']
-                        
-                        preview_elem = article.select_one(site_selectors['preview'])
-                        if preview_elem:
-                            preview = preview_elem.text.strip()
+                # Debug logging for the first 3 entries - REMOVED/COMMENTED OUT
+                # if entries_logged_count < 3:
+                #     print(f"DEBUG: Feed: {source_info['name']}")
+                #     print(f"DEBUG: Entry Title: {title}") # title var already populated
+                #     print(f"DEBUG: Entry Summary/Description: {preview if preview else 'No summary/description'}") # preview var already populated
+                #     print("---") # Separator
+                #     entries_logged_count += 1
+                
+                # Date parsing
+                parsed_date_struct = entry.get('published_parsed') or entry.get('updated_parsed')
+                story_date_iso = datetime.now().isoformat() # Default to now
+                if parsed_date_struct:
+                    try:
+                        story_date_iso = datetime.fromtimestamp(time.mktime(parsed_date_struct)).isoformat()
+                    except Exception as e_date:
+                        print(f"Could not parse date for entry '{title}' from {source_info['name']}: {e_date}. Using current time.")
+                
+                if not title or not link:
+                    # print(f"Skipping entry from {source_info['name']} due to missing title or link.")
+                    continue
 
-                    else: # Fallback for original generic selectors
-                        title_elem = article.select_one(site_selectors['title'])
-                        if title_elem:
-                            title = title_elem.text.strip()
-                        
-                        # Generic link finding:
-                        # 1. Try a direct child <a> tag
-                        # 2. Try if article itself is <a>
-                        # 3. Try any <a> tag within article
-                        link_tag = article.select_one('a') 
-                        if link_tag and link_tag.has_attr('href'):
-                            link = link_tag['href']
-                        elif article.has_attr('href'): # If article element is the link
-                            link = article['href']
-                        else: # Last resort search anywhere inside
-                            any_link_tag = article.find('a')
-                            if any_link_tag and any_link_tag.has_attr('href'):
-                                link = any_link_tag['href']
-                            else:
-                                print(f"No link found for article in {source} with title: {title if title else 'N/A'}")
-                                continue
-                        
-                        preview_elem = article.select_one(site_selectors['preview'])
-                        if preview_elem:
-                            preview = preview_elem.text.strip()
-
-                    if not title:
-                        # print(f"No title found for an article in {source}, skipping.")
-                        continue
-                    
-                    if not link:
-                        # print(f"No link found for article in {source} with title: {title}, skipping.")
-                        continue
-
-                    # Make link absolute if it's relative
-                    if link.startswith('//'): # Protocol relative URL
-                        parsed_source_url = requests.utils.urlparse(source)
-                        link = f"{parsed_source_url.scheme}:{link}"
-                    elif link.startswith('/'):
-                        parsed_source_url = requests.utils.urlparse(source)
-                        base_url = f"{parsed_source_url.scheme}://{parsed_source_url.netloc}"
-                        link = base_url + link
-                    elif not link.startswith(('http://', 'https://')):
-                        # Handle cases like 'www.example.com/story' or 'news/story.html'
-                        parsed_source_url = requests.utils.urlparse(source)
-                        base_url = f"{parsed_source_url.scheme}://{parsed_source_url.netloc}"
-                        # Resolve relative path from the source URL's path
-                        link = requests.compat.urljoin(source, link)
-
-
-                    # Check if it's a Florida Man story
-                    if is_florida_man_story(title, preview):
-                        stories.append({
-                            'title': title,
-                            'link': link,
-                            'preview': preview,
-                            'source': source,
-                            'date': datetime.now().isoformat(),
-                            'location': extract_florida_location(title + " " + preview)
-                        })
-                except Exception as e_article:
-                    print(f"Error processing article #{article_idx} from {source}: {e_article}. Title: '{title}', Link: '{link}'")
-                    # continue to next article
-
-        except requests.exceptions.RequestException as e_http:
-            print(f"HTTP Error scraping {source}: {e_http}")
-        except Exception as e_source:
-            print(f"General Error scraping {source}: {e_source}")
-
+                if is_florida_man_story(title, preview):
+                    story = {
+                        'title': title,
+                        'link': link,
+                        'preview': preview,
+                        'source': source_info['original_url'], # Use original website URL
+                        'date': story_date_iso,
+                        'location': extract_florida_location(title + " " + preview)
+                    }
+                    stories.append(story)
+                    print(f"Added Florida Man story: {title}")
+                    if len(stories) >= target_total_stories:
+                        print(f"Reached target of {target_total_stories} stories. Stopping.")
+                        break 
+            
+        except Exception as e:
+            print(f"Error processing feed for {source_info['name']} ({source_info['url']}): {e}")
 
     return stories
