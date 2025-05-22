@@ -127,23 +127,3 @@ def scrape_stories():
             print(f"Error processing feed for {source_info['name']} ({source_info['url']}): {e}")
 
     return stories
-
-# Add location extraction function
-def extract_florida_location(text):
-    florida_cities = ["miami", "orlando", "tampa", "jacksonville", "tallahassee", "gainesville"]
-    text_lower = text.lower()
-
-    for city in florida_cities:
-        if city in text_lower:
-            return city.capitalize()
-
-    return "Florida"  # Default if no specific city found
-
-def main():
-    stories = scrape_stories()
-    with open('florida_man_stories.json', 'w') as f:
-        json.dump({'last_updated': datetime.now().isoformat(), 'stories': stories}, f, indent=2)
-
-
-if __name__ == "__main__":
-    main()
