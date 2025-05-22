@@ -8,7 +8,7 @@ sources = [
     # Add more Florida news sources
 ]
 
-@@ -27,40 +30,143 @@ def scrape_stories():
+def scrape_stories():
     for source in sources:
         try:
             response = requests.get(source, headers={'User-Agent': 'Mozilla/5.0'})
