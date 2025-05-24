@@ -3,20 +3,19 @@ import json
 import time # Added
 from datetime import datetime
 
-# RSS Feed URLs
-FOX_NEWS_RSS = "https://moxie.foxnews.com/google-publisher/us.xml"
-LOCAL10_RSS = "https://www.local10.com/arc/outboundfeeds/rss/category/news/?outputType=xml&size=20"
-MIAMI_NEW_TIMES_RSS = "https://rss.miaminewtimes.com/"
-ORLANDO_WEEKLY_RSS = "https://www.orlandoweekly.com/orlando/Rss.xml?oid=2240408"
-FLORIDA_STAR_RSS = "https://www.thefloridastar.com/category/news/feed/"
-
 rss_sources = [
-    {"name": "Fox News", "url": FOX_NEWS_RSS, "original_url": "https://www.foxnews.com/category/us/us-regions/southeast/florida"},
-    {"name": "Local10", "url": LOCAL10_RSS, "original_url": "https://www.local10.com/news/florida/"},
-    {"name": "Miami New Times", "url": MIAMI_NEW_TIMES_RSS, "original_url": "https://www.miaminewtimes.com/news"},
-    {"name": "Orlando Weekly", "url": ORLANDO_WEEKLY_RSS, "original_url": "https://www.orlandoweekly.com/news"},
-    {"name": "The Florida Star", "url": FLORIDA_STAR_RSS, "original_url": "https://thefloridastar.com/category/news/"}
+    {"name": "Fox News", "url": "https://moxie.foxnews.com/google-publisher/us.xml", "original_url": "https://www.foxnews.com/category/us/us-regions/southeast/florida"},
+    {"name": "Local10", "url": "https://www.local10.com/arc/outboundfeeds/rss/category/news/?outputType=xml&size=20", "original_url": "https://www.local10.com/news/florida/"},
+    {"name": "Miami New Times", "url": "https://www.miaminewtimes.com/miami/Rss.xml?oid=6202154", "original_url": "https://www.miaminewtimes.com/news"},
+    {"name": "Orlando Weekly", "url": "https://www.orlandoweekly.com/orlando/Rss.xml?oid=2240408", "original_url": "https://www.orlandoweekly.com/news"},
+    {"name": "The Florida Star", "url": "https://www.thefloridastar.com/category/news/feed/", "original_url": "https://thefloridastar.com/category/news/"},
     # Tampa Bay Times is excluded as no RSS feed was found.
+    # New sources added:
+    {"name": "Metro Weekly", "url": "https://www.metroweekly.com/feed/", "original_url": "https://www.metroweekly.com/"},
+    {"name": "ClickOrlando", "url": "https://www.clickorlando.com/arc/outboundfeeds/rss/category/news/?outputType=xml&size=50", "original_url": "https://www.clickorlando.com/"},
+    {"name": "Yahoo News", "url": "https://news.yahoo.com/rss", "original_url": "https://www.yahoo.com/news/"},
+    {"name": "WFTV", "url": "https://www.wftv.com/feed/", "original_url": "https://www.wftv.com/"},
+    {"name": "NBC Miami", "url": "https://www.nbcmiami.com/?rss=y", "original_url": "https://www.nbcmiami.com/"}
 ]
 
 
@@ -31,7 +30,7 @@ def is_florida_man_story(title, text):
 
 def scrape_stories():
     stories = []
-    max_stories_per_feed = 50 # As per previous logic for HTML scraping iteration limit
+    max_stories_per_feed = 200 # As per previous logic for HTML scraping iteration limit
     target_total_stories = 10
 
     for source_info in rss_sources:
