@@ -6,7 +6,7 @@ from datetime import datetime
 # RSS Feed URLs
 FOX_NEWS_RSS = "https://moxie.foxnews.com/google-publisher/us.xml"
 LOCAL10_RSS = "https://www.local10.com/arc/outboundfeeds/rss/category/news/?outputType=xml&size=20"
-MIAMI_NEW_TIMES_RSS = "https://www.miaminewtimes.com/miami/Rss.xml?oid=6202154"
+MIAMI_NEW_TIMES_RSS = "https://rss.miaminewtimes.com/"
 ORLANDO_WEEKLY_RSS = "https://www.orlandoweekly.com/orlando/Rss.xml?oid=2240408"
 FLORIDA_STAR_RSS = "https://www.thefloridastar.com/category/news/feed/"
 
