@@ -22,9 +22,7 @@ rss_sources = [
 
 def is_florida_man_story(title, text):
     keywords = [
-        "florida man", "florida woman", "florida resident", "florida person", 
-        "a florida", "gainesville", "jacksonville", "miami", "orlando", "tampa", 
-        "arrested in florida", "florida sheriff", "bizarre florida", "strange florida"
+        "florida man", "florida woman"
     ]
     title_lower = title.lower()
     text_lower = text.lower()
@@ -77,10 +75,17 @@ def scrape_stories():
                     continue
 
                 if is_florida_man_story(title, preview):
+                    # Truncate preview to 4 lines
+                    lines = preview.split('\n')
+                    if len(lines) > 4:
+                        truncated_preview = '\n'.join(lines[:4])
+                    else:
+                        truncated_preview = preview
+
                     story = {
                         'title': title,
                         'link': link,
-                        'preview': preview,
+                        'preview': truncated_preview,
                         'source': source_info['original_url'], # Use original website URL
                         'date': story_date_iso,
                         'location': extract_florida_location(title + " " + preview)
