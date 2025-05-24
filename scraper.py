@@ -3,11 +3,6 @@ import json
 import time # Added
 from datetime import datetime
 
-# Removed old 'requests' and 'BeautifulSoup' imports as they are no longer needed for core functionality
-# import requests
-# from bs4 import BeautifulSoup
-# import os # Not strictly necessary anymore unless other file operations are added
-
 # RSS Feed URLs
 FOX_NEWS_RSS = "https://moxie.foxnews.com/google-publisher/us.xml"
 LOCAL10_RSS = "https://www.local10.com/arc/outboundfeeds/rss/category/news/?outputType=xml&size=20"
@@ -23,17 +18,6 @@ rss_sources = [
     {"name": "The Florida Star", "url": FLORIDA_STAR_RSS, "original_url": "https://thefloridastar.com/category/news/"}
     # Tampa Bay Times is excluded as no RSS feed was found.
 ]
-
-# Old sources list commented out
-# sources = [
-#     "https://www.foxnews.com/category/us/us-regions/southeast/florida",
-#     "https://www.local10.com/news/florida/",
-#     "https://www.tampabay.com/news/florida/",
-#     "https://www.miaminewtimes.com/news",
-#     "https://www.orlandoweekly.com/news",
-#     "https://thefloridastar.com/category/news/"
-#     # Add more Florida news sources
-# ]
 
 
 def is_florida_man_story(title, text):
@@ -53,10 +37,6 @@ def scrape_stories():
     target_total_stories = 10
 
     for source_info in rss_sources:
-        if len(stories) >= target_total_stories:
-            print(f"Reached target of {target_total_stories} stories. Stopping.")
-            break
-
         print(f"Fetching stories from {source_info['name']} ({source_info['url']})...")
         try:
             feed = feedparser.parse(source_info['url'])
@@ -74,9 +54,6 @@ def scrape_stories():
                 if entry_idx >= max_stories_per_feed:
                     print(f"Processed {max_stories_per_feed} entries for {source_info['name']}, moving to next source.")
                     break
-                
-                if len(stories) >= target_total_stories:
-                    break # Break from entries loop if target met
 
                 title = entry.title if hasattr(entry, 'title') else ""
                 link = entry.link if hasattr(entry, 'link') else ""
@@ -87,14 +64,6 @@ def scrape_stories():
                 elif hasattr(entry, 'description'):
                     preview = entry.description
 
-                # Debug logging for the first 3 entries - REMOVED/COMMENTED OUT
-                # if entries_logged_count < 3:
-                #     print(f"DEBUG: Feed: {source_info['name']}")
-                #     print(f"DEBUG: Entry Title: {title}") # title var already populated
-                #     print(f"DEBUG: Entry Summary/Description: {preview if preview else 'No summary/description'}") # preview var already populated
-                #     print("---") # Separator
-                #     entries_logged_count += 1
-                
                 # Date parsing
                 parsed_date_struct = entry.get('published_parsed') or entry.get('updated_parsed')
                 story_date_iso = datetime.now().isoformat() # Default to now
@@ -105,7 +74,6 @@ def scrape_stories():
                         print(f"Could not parse date for entry '{title}' from {source_info['name']}: {e_date}. Using current time.")
                 
                 if not title or not link:
-                    # print(f"Skipping entry from {source_info['name']} due to missing title or link.")
                     continue
 
                 if is_florida_man_story(title, preview):
@@ -119,11 +87,39 @@ def scrape_stories():
                     }
                     stories.append(story)
                     print(f"Added Florida Man story: {title}")
-                    if len(stories) >= target_total_stories:
-                        print(f"Reached target of {target_total_stories} stories. Stopping.")
-                        break 
             
         except Exception as e:
             print(f"Error processing feed for {source_info['name']} ({source_info['url']}): {e}")
 
+    # Sort stories by date and truncate if necessary
+    initial_story_count = len(stories)
+    stories.sort(key=lambda x: datetime.fromisoformat(x['date']), reverse=True)
+    
+    if initial_story_count > target_total_stories:
+        stories = stories[:target_total_stories]
+        print(f"Found {initial_story_count} stories, keeping the newest {target_total_stories}.")
+    
     return stories
+
+
+def extract_florida_location(text):
+    florida_locations = [
+        "Miami", "Orlando", "Tampa", "Jacksonville", "Gainesville", 
+        "St. Petersburg", "Tallahassee", "Fort Lauderdale", "Sarasota", 
+        "Pensacola", "Key West", "Palm Beach", "Broward County", "Miami-Dade County"
+    ]
+    text_lower = text.lower()
+    for location in florida_locations:
+        if location.lower() in text_lower:
+            return location
+    return "Florida"
+
+if __name__ == "__main__":
+    stories = scrape_stories()
+    output = {
+        'last_updated': datetime.now().isoformat(),
+        'stories': stories
+    }
+    with open('florida_man_stories.json', 'w') as f:
+        json.dump(output, f, indent=2)
+    print("Scraping complete. Output saved to florida_man_stories.json")
