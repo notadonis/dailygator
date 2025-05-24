@@ -97,5 +97,3 @@ git push origin feature/amazing-feature
 
 Built with love for Florida and its weirdly wonderful residents.
 No gators were harmed in the making of this app.
-
-```
